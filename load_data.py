@@ -1,7 +1,6 @@
 import pyshark
 import pandas as pd
 
-
 def network_conversation(packet):
     try:
         protocol = packet.transport_layer
