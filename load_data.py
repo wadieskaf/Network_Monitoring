@@ -15,8 +15,6 @@ def network_conversation(packet):
 capture = pyshark.FileCapture('./2019 Singapore ICS data/Dec2019_00000_20191206100500.pcap')
 conversations = []
 for i, packet in enumerate(capture):
-    if i == 20:
-        break
     results = network_conversation(packet)
     if results != None:
         conversations.append(results)
