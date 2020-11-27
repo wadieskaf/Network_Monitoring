@@ -18,7 +18,7 @@ capture = pyshark.FileCapture('./2019 Singapore ICS data/Dec2019_00000_201912061
 
 packet_list = []
 for i, packet in enumerate(capture):
-    if i == 20:
+    if i == 50:
         break
     packet_list.append(packet)
 
@@ -56,7 +56,6 @@ layers_dict = {'ETH': [{'dst': []}, {'dst_resolved': []}, {'dst_oui': []}],
 
 
 for i in range(len(packet_list)):
-    print(i)
     for layer_key in layers_dict.keys():
         layer_attributes = layers_dict[layer_key]
         for j, attribute in enumerate(layer_attributes):
