@@ -15,36 +15,34 @@ import pyshark
 capture = pyshark.FileCapture('./2019 Singapore ICS data/Dec2019_00000_20191206100500.pcap')
 packet_list = []
 for i, packet in enumerate(capture):
-    if i == 1000:
+    if i == 10000:
         break
     packet_list.append(packet)
 
 # Relevant features
 layers_dict = {'ETH': [{'dst_lg': []}, {'lg': []}, {'dst_ig': []}, {'ig': []}, {'src_lg': []}, {'src_ig': []}],
-               'VLAN': [{'priority': []}, {'dei': []}, {'id': []}],
-               'IP': [{'hdr_len': []}, {'len': []}, {'flags_rb': []}, {'flags_df': []}, {'flags_mf': []},
-                      {'frag_offset': []}, {'ttl': []}, {'proto': []}, {'checksum_status': []}],
-               'TCP': [{'stream': []}, {'len': []}, {'seq': []}, {'nxtseq': []}, {'ack': []},
-                       {'hdr_len': []}, {'flags_res': []}, {'flags_ns': []}, {'flags_cwr': []}, {'flags_ecn': []},
-                       {'flags_urg': []}, {'flags_ack': []},
-                       {'flags_push': []}, {'flags_reset': []}, {'flags_syn': []}, {'flags_fin': []},
+               'VLAN': [{'priority': []}, {'dei': []}],
+               'IP': [{'hdr_len': []}, {'len': []},
+                      {'ttl': []}, {'proto': []}, {'checksum_status': []}],
+               'TCP': [{'stream': []}, {'len': []}, {'seq': []}, {'nxtseq': []},
+                       {'hdr_len': []},
                        {'checksum_status': []}, {'urgent_pointer': []}],
-               'UDP': [{'length': []}, {'checksum_status': []}, {'stream': []}, {'time_relative': []},
-                       {'time_delta': []}]}
+               'UDP': [{'length': []}, {'checksum_status': []}, {'stream': []}]}
+
 
 # Set tree parameters
-num_feats = 41
-num_trees_set = [10, 20, 30, 40]
-shingle_size_set = [2, 3, 4]
-tree_size_set = [32, 64, 128, 256, 512]
+num_feats = 23
+num_trees_set = [27,31]
+shingle_size_set = [2]
+tree_size_set = [128]
 for num_trees in num_trees_set:
+    # Create a forest of empty trees
+    forest = []
+    for _ in range(num_trees):
+        tree = rrcf.RCTree()
+        forest.append(tree)
     for shingle_size in shingle_size_set:
         for tree_size in tree_size_set:
-            # Create a forest of empty trees
-            forest = []
-            for _ in range(num_trees):
-                tree = rrcf.RCTree()
-                forest.append(tree)
 
             # Use the "shingle" generator to create rolling window
             # points = rrcf.shingle(X, size=shingle_size)
@@ -55,7 +53,8 @@ for num_trees in num_trees_set:
             # For each shingle...
             # Need to account for NA values
             for index in range(len(packet_list) - shingle_size):
-
+                if index % 1000 == 0:
+                    print(f'{index} / 10000')
                 # print(index)
                 window = packet_list[index:index + shingle_size]
                 updated_window = np.empty((shingle_size, num_feats))
@@ -110,6 +109,10 @@ for num_trees in num_trees_set:
                     avg_codisp[index] += new_codisp / num_trees
                 # print(avg_codisp[index])
 
+            # for i in [40, 50, 60, 70, 80, 90, 100]:
+            #     temp_count = 0
+            #     print(avg_codisp.where())
+
             fig, ax1 = plt.subplots(figsize=(10, 5))
 
             # color = 'tab:red'
@@ -119,14 +122,18 @@ for num_trees in num_trees_set:
             # ax1.set_ylim(0,160)
             # ax2 = ax1.twinx()
             color = 'tab:blue'
-            ax1.set_ylabel('CoDisp', color=color, size=14)
-            ax1.plot(pd.Series(avg_codisp).sort_index(), color=color)
-            ax1.tick_params(axis='y', labelcolor=color, labelsize=12)
-            ax1.grid('off')
-            ax1.set_ylim(0, 160)
-            plt.title(
-                f'Network traffic Anomaly score (blue) with parameters num_trees: {num_trees} , shingle_size: {shingle_size}, '
-                f'tree_size: {tree_size}', size=14)
+            # ax1.set_ylabel('CoDisp', color=color, size=14)
+            # ax1.plot(pd.Series(avg_codisp).sort_index(), color=color)
+            # ax1.tick_params(axis='y', labelcolor=color, labelsize=12)
+            # ax1.grid('off')
+            # ax1.set_ylim(0, 160)
+            # plt.title(
+            #     f'Network traffic Anomaly score (blue) with parameters num_trees: {num_trees} , shingle_size: {shingle_size}, '
+            #     f'tree_size: {tree_size}', size=14)
+            # # plt.show()
+            # plt.savefig(f'outlier_{num_trees}_{shingle_size}_{tree_size}.jpg')
+            plt.hist(pd.Series(avg_codisp.values()), bins='auto')
+
             plt.show()
 
             print('##### End  of Combination #####')
