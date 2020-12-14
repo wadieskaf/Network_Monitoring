@@ -32,18 +32,17 @@ layers_dict = {'ETH': [{'dst_lg': []}, {'lg': []}, {'dst_ig': []}, {'ig': []}, {
 
 # Set tree parameters
 num_feats = 23
-num_trees_set = [27,31]
-shingle_size_set = [2]
+num_trees_set = [20,25,30,35,40,50,60,70]
+shingle_size_set = [2,4,6,8]
 tree_size_set = [128]
 for num_trees in num_trees_set:
-    # Create a forest of empty trees
-    forest = []
-    for _ in range(num_trees):
-        tree = rrcf.RCTree()
-        forest.append(tree)
     for shingle_size in shingle_size_set:
         for tree_size in tree_size_set:
-
+            # Create a forest of empty trees
+            forest = []
+            for _ in range(num_trees):
+                tree = rrcf.RCTree()
+                forest.append(tree)
             # Use the "shingle" generator to create rolling window
             # points = rrcf.shingle(X, size=shingle_size)
 
@@ -133,7 +132,7 @@ for num_trees in num_trees_set:
             # # plt.show()
             # plt.savefig(f'outlier_{num_trees}_{shingle_size}_{tree_size}.jpg')
             plt.hist(pd.Series(avg_codisp.values()), bins='auto')
-
-            plt.show()
+            plt.savefig(f'histograms/histogram_{num_trees}_{shingle_size}.jpg')
+            # plt.show()
 
             print('##### End  of Combination #####')
