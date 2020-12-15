@@ -43,6 +43,7 @@ for num_trees in num_trees_set:
             for _ in range(num_trees):
                 tree = rrcf.RCTree()
                 forest.append(tree)
+
             # Use the "shingle" generator to create rolling window
             # points = rrcf.shingle(X, size=shingle_size)
 
@@ -52,8 +53,7 @@ for num_trees in num_trees_set:
             # For each shingle...
             # Need to account for NA values
             for index in range(len(packet_list) - shingle_size):
-                if index % 1000 == 0:
-                    print(f'{index} / 10000')
+
                 # print(index)
                 window = packet_list[index:index + shingle_size]
                 updated_window = np.empty((shingle_size, num_feats))
@@ -107,10 +107,6 @@ for num_trees in num_trees_set:
                         avg_codisp[index] = 0
                     avg_codisp[index] += new_codisp / num_trees
                 # print(avg_codisp[index])
-
-            # for i in [40, 50, 60, 70, 80, 90, 100]:
-            #     temp_count = 0
-            #     print(avg_codisp.where())
 
             fig, ax1 = plt.subplots(figsize=(10, 5))
 
